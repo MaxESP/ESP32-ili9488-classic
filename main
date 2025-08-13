@@ -1,0 +1,189 @@
+#include <SPI.h>
+#include <TFT_eSPI.h>
+//#include "Adafruit_HTU21DF.h"
+
+
+#include "Back.h"
+#include "Back2.h"
+#include "Arial24.h"
+#include "Arial26.h"
+//#include "Arial40.h"
+#include "Arial45.h"
+#include "Arial48.h" 
+
+
+#define Arial20
+#define Arial37
+#define Arial45
+#define BTN_PIN 15
+#define LED_BUILTIN 25
+long previousMillis = 0;
+long interval =1000;
+long previousMillis1 = 0;
+long interval1 =1000;
+
+
+unsigned long timerOne = 0; 
+unsigned long timerTwo = 0;
+unsigned long timerOne1 = 0; 
+unsigned long timerTwo2 = 0;
+
+#define RXD2 16
+#define TXD2 17
+const int Bk = 13;
+//const int BTN_PIN  15;
+
+//Adafruit_HTU21DF htu = Adafruit_HTU21DF();
+HardwareSerial SerialP(2);
+TFT_eSPI tft = TFT_eSPI();
+int c;
+
+int button_state =0;
+int pushed=LOW;
+int led_state = LOW;
+ bool SR1 =true;
+ bool SR2 =false;
+
+String LAT;
+  String LAT2;
+  String LONG;
+  String LONG2;
+  int nb;
+  int sp;
+  int Cog;
+  int h;
+  int mn;
+  int s;
+
+int roll ;
+int pitch;
+int hdg;
+int yaw;
+
+int ledState = LOW;
+int btnState = LOW;
+int lastBtnState = LOW;
+
+
+
+
+void setup()
+{
+
+ pinMode(25,OUTPUT);// BK 
+ pinMode(13,OUTPUT);// BK
+ pinMode(15,INPUT);// BK
+ digitalWrite(25,LOW);
+analogWrite(Bk, 150);
+ delay(15);
+  
+  //Wire.begin(); // Wire communication begin
+  Serial.begin(115200); // The baudrate of Serial monitor is set in 9600
+
+//button_state = digitalRead(buttonPin);
+int reading = digitalRead(BTN_PIN);
+  
+ 
+
+tft.begin();
+//invertDisplay(true);
+  tft.setRotation(45);  
+  tft.setSwapBytes(true); 
+   tft.fillScreen(TFT_BLACK); 
+  tft.pushImage(0,0,480,320,Back); 
+//Screen1();
+delay(1000);
+}
+void Switch(){
+int reading = digitalRead(BTN_PIN);
+//  if (reading != lastBtnState) {
+//    lastDebounceTime = millis();
+//  }
+   //if ((millis() - lastDebounceTime) > debounceDelay) {
+    if (reading != btnState) {
+      btnState = reading;
+      if (btnState == HIGH) {
+        ledState = !ledState;
+        digitalWrite(LED_BUILTIN, ledState);
+        //Serial.print(ledState);        
+      }
+    // }
+  if(ledState==1){
+     SR1 = false;
+  tft.setRotation(45);
+  tft.setSwapBytes(true);  
+  tft.pushImage(0,0,480,320,Back2); 
+ SR2 = true;
+
+    }else {
+      SR1 = true;
+ //tft.begin();
+  tft.setRotation(45);
+  tft.setSwapBytes(true);  
+  tft.pushImage(0,0,480,320,Back); 
+ SR2 = false;
+} 
+  } 
+lastBtnState = reading; 
+
+}
+
+
+
+void loop(void) {
+witch(); 
+if(SR1) {
+SR2=false;
+DATAGPS(LAT,nb,sp,Cog,h,mn,s);
+Screen3();
+//if(nb>1){
+////Screen3();//attention bonne position
+//BlinkGreen();
+// }else{ // ((SerialP.available()>0)&(nb==0)) 
+//blinkRED(); 
+ //}
+ }
+ 
+if(SR2) {
+ SR1=false; 
+//IMU(roll,pitch,hdg);
+//Screen1();  
+//Screen2();
+ }
+delay(100);
+
+}
+
+void IMU(int &roll,int &pitch,int &hdg){
+if (Serial.available()>0) {
+
+
+ 
+ Data1 = Serial.readStringUntil('\n');
+ //Serial.println(Data1);
+
+String readString =Data1;
+int delimiter, delimiter_1, delimiter_2,delimiter_3,delimiter_4,delimiter_5;
+
+delimiter = readString.indexOf(":");
+delimiter_1 = readString.indexOf(":", delimiter_1 );
+delimiter_2 = readString.indexOf(":", delimiter_1 +1);
+delimiter_3 = readString.indexOf(":", delimiter_2 +1);
+delimiter_4 = readString.indexOf(":", delimiter_3 +1);
+delimiter_5 = readString.indexOf(":", delimiter_4 +1);
+
+String A = readString.substring(delimiter -2 , delimiter_1);
+String Roll = readString.substring(delimiter_1 + 1, delimiter_2);
+String Pitch = readString.substring(delimiter_2 + 1, delimiter_3);
+String Hdg = readString.substring(delimiter_3 + 1, delimiter_4);
+String Yaw = readString.substring(delimiter_4 + 1, delimiter_4);
+
+ roll = (Roll.toInt());
+ pitch = (Pitch.toInt());
+ hdg=(Hdg.toInt());
+ yaw=(Yaw.toInt());
+}
+}
+
+
+
