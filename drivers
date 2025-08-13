@@ -1,1 +1,12 @@
 
+CREDIT TO Bodmer TFT_eSPI
+
+What a amazing library!!!!! for driving lcd because when you use a compass and imu6050 you need fast response of the lcd and i reach 500ms with no flicker digit .the strategy was to load the background in the setup than update the compass and imu values in the loop.
+Next step was to switch background to have different view. So a create a function to switch at the beginning of the loop to swap the view on the screen.
+
+ 
+
+
+
+
+
